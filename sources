@@ -1,0 +1,6 @@
+# Repositories whose latest GitHub Release goes into apt.
+# A package with ~<codename> in its version goes only into that Ubuntu release;
+# without the suffix, into all of them (static binaries).
+tihonove/smoothcast
+tihonove/curlog
+tihonove/wf-recorder

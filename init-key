@@ -1,0 +1,18 @@
+#!/bin/bash
+# Run once: create the apt repository signing key.
+# The private part goes only into the APT_SIGNING_KEY secret of tihonove/apt and
+# is not kept locally. The public part goes into key.asc (committed; install.sh
+# serves it to /etc/apt/keyrings).
+# Key lost or compromised: run this again, commit key.asc and rerun install.sh
+# on the machines.
+set -euo pipefail
+cd "$(dirname "$0")"
+
+export GNUPGHOME=$(mktemp -d)
+trap 'rm -rf "$GNUPGHOME"' EXIT
+
+gpg --batch --quiet --passphrase '' --quick-gen-key "tihonove apt <tihonov.ea@gmail.com>" ed25519 sign never
+fpr=$(gpg --list-keys --with-colons | awk -F: '/^fpr/{print $10; exit}')
+gpg --armor --export-secret-keys "$fpr" | gh secret set APT_SIGNING_KEY -R tihonove/apt
+gpg --armor --export "$fpr" > key.asc
+echo "Key $fpr: private part in the APT_SIGNING_KEY secret, public part in key.asc"

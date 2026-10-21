@@ -1,0 +1,57 @@
+#!/bin/bash
+# Build the apt repository into site/ from the latest releases of the repos in sources.
+#   build            → site/ + site/state.txt
+#   build --state    → only print the state (what the releases hold right now)
+# Needs gh (with a token), reprepro and the signing key imported into gpg.
+set -euo pipefail
+cd "$(dirname "$0")"
+
+repos=$(grep -v '^\s*\(#\|$\)' sources)
+codenames=$(sed -n 's/^Codename: //p' conf/distributions.in)
+
+# What the latest releases hold: CI compares this to decide whether to rebuild.
+state() {
+    for r in $repos; do
+        gh release view -R "$r" --json tagName,assets \
+            -q '.tagName as $t | .assets[] | select(.name|endswith(".deb")) | "\($t) \(.name) \(.size)"' |
+            sed "s|^|$r |"
+    done
+}
+if [[ ${1:-} == --state ]]; then state; exit 0; fi
+
+rm -rf debs site work
+mkdir -p debs site work/conf
+for r in $repos; do
+    gh release download -R "$r" --pattern '*.deb' -D debs
+done
+
+fpr=$(gpg --list-secret-keys --with-colons | awk -F: '/^fpr/{print $10; exit}')
+[[ -n $fpr ]] || { echo "no signing key" >&2; exit 1; }
+sed "s/@FPR@/$fpr/" conf/distributions.in > work/conf/distributions
+
+for c in $codenames; do
+    for deb in debs/*.deb; do
+        v=$(dpkg-deb -f "$deb" Version)
+        case $v in
+            *~"$c") ;;          # built for this release
+            *~*) continue ;;    # built for another one
+            *) ;;               # not tied to a release
+        esac
+        reprepro -b work --outdir "$PWD/site" includedeb "$c" "$deb"
+    done
+done
+
+cp key.asc site/key.asc
+sed "s/@CODENAMES@/$(echo $codenames)/" install.sh > site/install.sh
+state > site/state.txt
+cat > site/index.html <<HTML
+<!doctype html><meta charset=utf-8><title>tihonove apt</title>
+<pre>
+tihonove apt repository: smoothcast, curlog, wf-recorder-nc
+Ubuntu: $codenames · amd64, arm64
+
+curl -fsSL https://tihonove.github.io/apt/install.sh | sudo sh
+
+https://github.com/tihonove/apt
+</pre>
+HTML

@@ -1,0 +1,13 @@
+Codename: noble
+Suite: noble
+Architectures: amd64 arm64
+Components: main
+Description: tihonove — Ubuntu 24.04
+SignWith: @FPR@
+
+Codename: resolute
+Suite: resolute
+Architectures: amd64 arm64
+Components: main
+Description: tihonove — Ubuntu 26.04
+SignWith: @FPR@

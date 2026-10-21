@@ -1,0 +1,64 @@
+# Rebuild the apt repository from the latest releases (sources) and publish to Pages.
+# Hourly: the tools' release workflows can't trigger this one without an extra token.
+# Nothing new in the releases: exit without touching Pages.
+name: publish
+
+on:
+  schedule:
+    - cron: '23 * * * *'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: rebuild even if the releases haven't changed
+        type: boolean
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.check.outputs.changed }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: check
+        run: |
+          ./build --state > want.txt
+          curl -fsS "https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/state.txt" > have.txt || true
+          if [[ "${{ github.event_name }}" == push || "${{ inputs.force }}" == true ]] || ! cmp -s want.txt have.txt; then
+            echo changed=true >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.check.outputs.changed
+        run: sudo apt-get install -qy reprepro
+      - if: steps.check.outputs.changed
+        run: |
+          printf '%s\n' "$APT_SIGNING_KEY" | gpg --batch --import
+          ./build
+        env:
+          APT_SIGNING_KEY: ${{ secrets.APT_SIGNING_KEY }}
+      - if: steps.check.outputs.changed
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    if: needs.build.outputs.changed
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
