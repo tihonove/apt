@@ -1,7 +1,7 @@
 #!/bin/sh
 # Add the tihonove apt repository and install the packages:
 #   curl -fsSL https://tihonove.github.io/apt/install.sh | sudo sh
-#   curl -fsSL https://tihonove.github.io/apt/install.sh | sudo sh -s -- curlog   # just these
+#   curl -fsSL https://tihonove.github.io/apt/install.sh | sudo sh -s -- wl-castlog   # just these
 # Safe to rerun: rewrites the key and the source, apt installs what's missing.
 # Updates then arrive with a regular apt upgrade.
 set -eu
@@ -28,5 +28,5 @@ Signed-By: /etc/apt/keyrings/tihonove.asc
 SRC
 
 apt-get update
-[ $# -gt 0 ] || set -- smoothcast curlog wf-recorder-nc
+[ $# -gt 0 ] || set -- smoothcast wl-castlog wf-recorder-nc
 apt-get install -y "$@"

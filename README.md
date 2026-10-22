@@ -1,7 +1,7 @@
 # apt
 
 An apt repository for my own tools: [smoothcast](https://github.com/tihonove/smoothcast),
-[curlog](https://github.com/tihonove/curlog),
+[wl-castlog](https://github.com/tihonove/wl-castlog),
 [wf-recorder-nc](https://github.com/tihonove/wf-recorder). Ubuntu 24.04 (noble) and
 26.04 (resolute), amd64 and arm64.
 
@@ -11,7 +11,7 @@ curl -fsSL https://tihonove.github.io/apt/install.sh | sudo sh
 
 Puts the key into `/etc/apt/keyrings/tihonove.asc`, the source into
 `/etc/apt/sources.list.d/tihonove.sources` and installs all three packages (or
-just the ones given: `| sudo sh -s -- curlog`). Updates come with a regular
+just the ones given: `| sudo sh -s -- wl-castlog`). Updates come with a regular
 `apt upgrade`.
 
 ## How it works

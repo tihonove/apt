@@ -47,7 +47,7 @@ state > site/state.txt
 cat > site/index.html <<HTML
 <!doctype html><meta charset=utf-8><title>tihonove apt</title>
 <pre>
-tihonove apt repository: smoothcast, curlog, wf-recorder-nc
+tihonove apt repository: smoothcast, wl-castlog, wf-recorder-nc
 Ubuntu: $codenames · amd64, arm64
 
 curl -fsSL https://tihonove.github.io/apt/install.sh | sudo sh

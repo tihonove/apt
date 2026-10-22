@@ -2,5 +2,5 @@
 # A package with ~<codename> in its version goes only into that Ubuntu release;
 # without the suffix, into all of them (static binaries).
 tihonove/smoothcast
-tihonove/curlog
+tihonove/wl-castlog
 tihonove/wf-recorder
