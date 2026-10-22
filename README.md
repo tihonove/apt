@@ -21,7 +21,9 @@ just the ones given: `| sudo sh -s -- curlog`). Updates come with a regular
 - Here, `publish` checks the latest releases of the repos listed in `sources`
   every hour. If something changed, `build` assembles the repository with
   reprepro, signs it with the key from the `APT_SIGNING_KEY` secret and deploys
-  it to GitHub Pages. To skip the wait: `gh workflow run publish -R tihonove/apt`.
+  it to GitHub Pages. The tools' `./release` script triggers
+  `publish` right after its packages are built, so there's no wait; by hand:
+  `gh workflow run publish -R tihonove/apt`.
 - A version with `~noble`/`~resolute` goes only into its own Ubuntu release
   (those link against system libraries); one without a suffix goes into all of
   them (the static smoothcast).
